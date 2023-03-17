@@ -1,0 +1,93 @@
+package com.codecool.jpasecurity.service;
+
+import com.codecool.jpasecurity.dto.CatChart;
+import com.codecool.jpasecurity.dto.NeedlePieRevenueDTO;
+import com.codecool.jpasecurity.dto.ToolTipDTO;
+import com.codecool.jpasecurity.enums.ExpenseType;
+import com.codecool.jpasecurity.model.Expense;
+import com.codecool.jpasecurity.model.Revenue;
+import com.codecool.jpasecurity.model.User;
+import com.codecool.jpasecurity.repository.ExpenseRepository;
+import com.codecool.jpasecurity.repository.RevenueRepository;
+import org.springframework.stereotype.Service;
+
+import java.time.Month;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+
+@Service
+public class ChartService {
+    private final ExpenseRepository expenseRepository;
+    private final RevenueRepository revenueRepository;
+    private final GetUsers getUsers;
+
+    public ChartService(ExpenseRepository expenseRepository, RevenueRepository revenueRepository, GetUsers getUsers) {
+        this.expenseRepository = expenseRepository;
+        this.revenueRepository = revenueRepository;
+        this.getUsers = getUsers;
+    }
+
+    public List<CatChart> getPieChartDataForUser() {
+        User owner = getUsers.getUser();
+        return getCatChartsForUser(owner.userId);
+    }
+
+    public List<ToolTipDTO> getToolTipData() {
+        User owner = getUsers.getUser();
+        List<Expense> expenses = expenseRepository.findAllByOwner_UserId(owner.userId);
+        List<ToolTipDTO> toolTipDTOS = new ArrayList<>();
+        Arrays.stream(getMonths()).forEach(month -> {
+            long sumByMonth = expenses.stream().
+                    filter(expense -> expense.getLocalDate()
+                            .getMonth().equals(month)).mapToLong(Expense::getAmount).sum();
+            if (sumByMonth != 0) {
+                toolTipDTOS.add(new ToolTipDTO(month.name(), sumByMonth));
+            }
+        });
+        return toolTipDTOS;
+    }
+
+    private List<CatChart> getCatChartsForUser(long userId) {
+        List<CatChart> usersDataCatChart = new ArrayList<>();
+        Set<ExpenseType> usersExpensesCategories = findExpenseTypeByUserId(userId);
+
+        for (ExpenseType usersExpensesCategory : usersExpensesCategories) {
+            CatChart catChart = toCatChart(usersExpensesCategory, userId);
+            usersDataCatChart.add(catChart);
+        }
+        return usersDataCatChart;
+    }
+
+    private Set<ExpenseType> findExpenseTypeByUserId(long userId) {
+        return expenseRepository.findExpenseTypeFromUser(userId);
+    }
+
+    private CatChart toCatChart(ExpenseType expenseType, long ownerId) {
+        int numberOfExpenses = expenseRepository.countByExpenseTypeAndOwner_UserId(expenseType, ownerId);
+        return new CatChart(expenseType, numberOfExpenses);
+    }
+
+    public List<NeedlePieRevenueDTO> getNeedlePieRevenueDTO() {
+        List<NeedlePieRevenueDTO> needlePieRevenueDTOS = new ArrayList<>();
+        User owner = getUsers.getUser();
+        List<Expense> expenses = expenseRepository.findAllByOwner_UserId(owner.userId);
+
+        long expensesSum = expenses.stream().
+                mapToLong(Expense::getAmount).sum();
+        Optional<Revenue> revenue = revenueRepository.findByOwner_Username(owner.getUsername());
+
+        if (revenue.isPresent()) {
+            needlePieRevenueDTOS.add(new NeedlePieRevenueDTO(revenue.get().getAmount(), expensesSum));
+        } else {
+            needlePieRevenueDTOS.add(new NeedlePieRevenueDTO(0L, expensesSum));
+        }
+        return needlePieRevenueDTOS;
+    }
+
+    private Month[] getMonths() {
+        return Month.values();
+    }
+}

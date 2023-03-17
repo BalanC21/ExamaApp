@@ -1,0 +1,41 @@
+package com.codecool.jpasecurity.controller;
+
+import com.codecool.jpasecurity.dto.LogInDTO;
+import com.codecool.jpasecurity.dto.SignUpDTO;
+import com.codecool.jpasecurity.service.AuthService;
+import jakarta.validation.Valid;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+@RequestMapping("/api/auth")
+public class AuthController {
+
+    private final AuthService authService;
+
+    public AuthController(AuthService authService) {
+        this.authService = authService;
+    }
+
+    @PostMapping("/token")
+    public ResponseEntity<?> authenticateUser(@Valid @RequestBody LogInDTO logInDTO) {
+        return ResponseEntity.ok(authService.authenticateUser(logInDTO));
+    }
+
+    @PostMapping("/signup")
+    public ResponseEntity<?> signUp(@Valid @RequestBody SignUpDTO signUpDTO) {
+        authService.signUp(signUpDTO);
+        return ResponseEntity.ok("User registered successfully! " + signUpDTO);
+    }
+
+    @GetMapping("/logout")
+    public ResponseEntity<?> logOut() {
+        SecurityContextHolder.clearContext();
+        return ResponseEntity.ok("Logged Out!");
+    }
+}
