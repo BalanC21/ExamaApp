@@ -1,8 +1,10 @@
 REACT_APP_BASE_URL=http://localhost:8888/api/
 REACT_APP_CRUD_EXPENSES=expenses
-REACT_APP_CRUD_REVENUE=revenues
+REACT_APP_EXPENSES_ORDERED_BY_AMOUNT_ASC=expenses/ordered-amount-asc
+REACT_APP_EXPENSES_ORDERED_BY_AMOUNT_DESC=expenses/ordered-amount-desc
 REACT_APP_CRUD_EXPENSES_CATEGORIES=expenses/expenses-categories
 REACT_APP_CRUD_CATEGORIES_USED=expenses/expense-type/all
+REACT_APP_CRUD_REVENUE=revenues
 REACT_APP_CRUD_CHART_DATA=charts
 REACT_APP_CRUD_TOOLTIP_DATA=charts/tooltip
 REACT_APP_CRUD_NEEDLE_PIE_DATA=charts/needle-pie
