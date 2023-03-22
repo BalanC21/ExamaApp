@@ -1,28 +1,30 @@
 package com.codecool.jpasecurity.service;
 
 import com.codecool.jpasecurity.enums.ExpenseType;
+import com.codecool.jpasecurity.exceptions.ExpenseNotFoundException;
+import com.codecool.jpasecurity.exceptions.RevenueNotFoundException;
 import com.codecool.jpasecurity.model.Expense;
+import com.codecool.jpasecurity.model.Revenue;
 import com.codecool.jpasecurity.model.User;
 import com.codecool.jpasecurity.repository.ExpenseRepository;
+import com.codecool.jpasecurity.repository.RevenueRepository;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class ExpenseService {
     private final ExpenseRepository repository;
     private final GetUsers getUsers;
+    private final RevenueRepository revenueRepository;
 
-    public ExpenseService(ExpenseRepository repository, GetUsers getUsers) {
+    public ExpenseService(ExpenseRepository repository, GetUsers getUsers, RevenueRepository revenueRepository) {
         this.repository = repository;
         this.getUsers = getUsers;
-    }
-
-    public Iterable<Expense> findAll() {
-        return repository.findAll();
+        this.revenueRepository = revenueRepository;
     }
 
     public void addExpense(Expense expense) {
@@ -35,18 +37,18 @@ public class ExpenseService {
         repository.save(expense);
     }
 
-    public Expense findById(Long id) {
-        return repository.findById(id).orElseThrow(NoClassDefFoundError::new);
-    }
+    public Expense updateExpense(Long expenseId, Expense modifiedExpense) {
+        Expense toUpdateExpense = getExpenseById(expenseId);
+        modifyUserRevenueForUpdatingExpense(expenseId, modifiedExpense);
 
-    public Expense updateExpense(Long id, Expense expense) {
-        Expense toUpdateExpense = repository.findById(id).orElseThrow(NoClassDefFoundError::new);
-        toUpdateExpense.setAmount(expense.getAmount());
-        toUpdateExpense.setLocalDate(expense.getLocalDate());
-        toUpdateExpense.setDescription(expense.getDescription());
-        toUpdateExpense.setExpenseType(expense.getExpenseType());
+        toUpdateExpense.setAmount(modifiedExpense.getAmount());
+        toUpdateExpense.setLocalDate(modifiedExpense.getLocalDate());
+        toUpdateExpense.setDescription(modifiedExpense.getDescription());
+        toUpdateExpense.setExpenseType(modifiedExpense.getExpenseType());
+
         repository.save(toUpdateExpense);
-        return expense;
+
+        return modifiedExpense;
     }
 
     public List<Expense> filterExpensesByType(ExpenseType expense) {
@@ -69,8 +71,52 @@ public class ExpenseService {
         return repository.findAllByOwner_UserId(owner.userId);
     }
 
-    public boolean deleteById(Long id) {
-        repository.deleteById(id);
+    public boolean deleteById(Long expenseId) {
+        modifyUserRevenueForDeletingExpense(expenseId);
+        repository.deleteById(expenseId);
         return true;
+    }
+
+    private void modifyUserRevenueForDeletingExpense(Long expenseId) {
+        Expense toDeleteExpense = getExpenseById(expenseId);
+        Revenue ownerRevenue = getRevenueForUser();
+
+        long ownerRevenueInitialAmount = ownerRevenue.getAmount();
+        ownerRevenue.setAmount(ownerRevenueInitialAmount + toDeleteExpense.getAmount());
+
+        revenueRepository.save(ownerRevenue);
+    }
+
+    private void modifyUserRevenueForUpdatingExpense(Long expenseId, Expense modifiedExpense) {
+        Expense toUpdateExpense = getExpenseById(expenseId);
+        Revenue ownerRevenue = getRevenueForUser();
+        long ownerRevenueInitialAmount = ownerRevenue.getAmount();
+
+        long diff = modifiedExpense.getAmount() - toUpdateExpense.getAmount();
+
+        ownerRevenue.setAmount(ownerRevenueInitialAmount - diff);
+
+        revenueRepository.save(ownerRevenue);
+    }
+
+    private Expense getExpenseById(long expenseId) {
+        Optional<Expense> expense = repository.findById(expenseId);
+
+        if (expense.isEmpty()) {
+            throw new ExpenseNotFoundException(expenseId);
+        }
+
+        return expense.get();
+    }
+
+    private Revenue getRevenueForUser() {
+        User owner = getUsers.getUser();
+        Optional<Revenue> ownerRevenue = revenueRepository.findByOwner_Username(owner.getUsername());
+
+        if (ownerRevenue.isEmpty()) {
+            throw new RevenueNotFoundException();
+        }
+
+        return ownerRevenue.get();
     }
 }
