@@ -2,6 +2,8 @@ package com.codecool.jpasecurity.repository;
 
 import com.codecool.jpasecurity.enums.ExpenseType;
 import com.codecool.jpasecurity.model.Expense;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -19,8 +21,12 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
 
     Optional<List<Expense>> findAllByExpenseType(ExpenseType expenseType);
 
-    @Query(value = "select Expense.expense_type from Expense where Expense.user_id = ?1", nativeQuery = true)
+    @Query(value = "select expense_type from expense where user_id = ?1", nativeQuery = true)
     Set<ExpenseType> findExpenseTypeFromUser(long id);
+
+    Optional<List<Expense>> getAllByOwner_UsernameOrderByAmount(@NotBlank @Size(max = 20) String owner_username);
+
+    Optional<List<Expense>> getAllByOwner_UsernameOrderByAmountDesc(@NotBlank @Size(max = 20) String owner_username);
 
     int countByExpenseTypeAndOwner_UserId(ExpenseType expenseType, long id);
 
