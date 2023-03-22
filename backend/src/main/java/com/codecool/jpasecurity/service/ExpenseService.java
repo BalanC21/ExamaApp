@@ -1,5 +1,6 @@
 package com.codecool.jpasecurity.service;
 
+import com.codecool.jpasecurity.dto.ExpenseDTO;
 import com.codecool.jpasecurity.enums.ExpenseType;
 import com.codecool.jpasecurity.exceptions.ExpenseNotFoundException;
 import com.codecool.jpasecurity.exceptions.RevenueNotFoundException;
@@ -27,17 +28,30 @@ public class ExpenseService {
         this.revenueRepository = revenueRepository;
     }
 
-    public void addExpense(Expense expense) {
-        User user = getUsers.getUser();
-
-        if (expense.getLocalDate() == null) {
-            expense.setLocalDate(LocalDate.now());
-        }
-        expense.setOwner(user);
+    public void addExpense(ExpenseDTO expenseDTO) {
+        Expense expense = mapToExpense(expenseDTO);
         repository.save(expense);
     }
 
-    public Expense updateExpense(Long expenseId, Expense modifiedExpense) {
+    private Expense mapToExpense(ExpenseDTO expenseDTO) {
+        User owner = getUsers.getUser();
+        Expense toSaveExpense = new Expense();
+
+        toSaveExpense.setAmount(expenseDTO.getAmount());
+        toSaveExpense.setDescription(expenseDTO.getDescription());
+        toSaveExpense.setExpenseType(expenseDTO.getExpenseType());
+
+        if (expenseDTO.getLocalDate() == null) {
+            toSaveExpense.setLocalDate(LocalDate.now());
+        } else {
+            toSaveExpense.setLocalDate(expenseDTO.getLocalDate());
+        }
+
+        toSaveExpense.setOwner(owner);
+        return toSaveExpense;
+    }
+
+    public Expense updateExpense(Long expenseId, ExpenseDTO modifiedExpense) {
         Expense toUpdateExpense = getExpenseById(expenseId);
         modifyUserRevenueForUpdatingExpense(expenseId, modifiedExpense);
 
@@ -48,7 +62,7 @@ public class ExpenseService {
 
         repository.save(toUpdateExpense);
 
-        return modifiedExpense;
+        return toUpdateExpense;
     }
 
     public List<Expense> filterExpensesByType(ExpenseType expense) {
@@ -87,7 +101,7 @@ public class ExpenseService {
         revenueRepository.save(ownerRevenue);
     }
 
-    private void modifyUserRevenueForUpdatingExpense(Long expenseId, Expense modifiedExpense) {
+    private void modifyUserRevenueForUpdatingExpense(Long expenseId, ExpenseDTO modifiedExpense) {
         Expense toUpdateExpense = getExpenseById(expenseId);
         Revenue ownerRevenue = getRevenueForUser();
         long ownerRevenueInitialAmount = ownerRevenue.getAmount();
@@ -97,6 +111,16 @@ public class ExpenseService {
         ownerRevenue.setAmount(ownerRevenueInitialAmount - diff);
 
         revenueRepository.save(ownerRevenue);
+    }
+
+    public Expense getExpenseByIDTest(long expenseId) {
+        Optional<Expense> expense = repository.findById(expenseId);
+
+        if (expense.isEmpty()) {
+            throw new ExpenseNotFoundException(expenseId);
+        }
+
+        return expense.get();
     }
 
     private Expense getExpenseById(long expenseId) {

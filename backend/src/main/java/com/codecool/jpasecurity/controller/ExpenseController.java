@@ -1,5 +1,6 @@
 package com.codecool.jpasecurity.controller;
 
+import com.codecool.jpasecurity.dto.ExpenseDTO;
 import com.codecool.jpasecurity.enums.ExpenseType;
 import com.codecool.jpasecurity.model.Expense;
 import com.codecool.jpasecurity.service.ExpenseService;
@@ -14,31 +15,31 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.io.IOException;
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/expenses")
 public class ExpenseController {
     private final ExpenseService expenseService;
+
     public ExpenseController(ExpenseService expenseService) {
         this.expenseService = expenseService;
     }
 
     @GetMapping
-    public ResponseEntity<List<Expense>> getAllExpensesByUsers() throws IOException {
+    public ResponseEntity<List<Expense>> getAllExpensesByUsers() {
         List<Expense> expenses = expenseService.getAllExpensesByUser();
         return ResponseEntity.ok(expenses);
-    }
-
-    @GetMapping("/{id}/find")
-    public ResponseEntity<Expense> findById(@PathVariable Long id) {
-        return ResponseEntity.ok(expenseService.findById(id));
     }
 
     @GetMapping("/{expenseType}/filter")
     public List<Expense> getExpensesByExpenseType(@PathVariable ExpenseType expenseType) {
         return expenseService.filterExpensesByType(expenseType);
+    }
+
+    @GetMapping("/{expenseId}")
+    public Expense getExpensesByID(@PathVariable long expenseId) {
+        return expenseService.getExpenseByIDTest(expenseId);
     }
 
     @GetMapping("/expenses-categories")
@@ -48,9 +49,9 @@ public class ExpenseController {
     }
 
     @PostMapping
-    public ResponseEntity<Expense> addExpense(@Valid @RequestBody Expense expense) throws IOException {
-        expenseService.addExpense(expense);
-        return ResponseEntity.ok(expense);
+    public ResponseEntity<ExpenseDTO> addExpense(@Valid @RequestBody ExpenseDTO expenseDTO) {
+        expenseService.addExpense(expenseDTO);
+        return ResponseEntity.ok(expenseDTO);
     }
 
     @PostMapping("/amount/filter")
@@ -59,7 +60,7 @@ public class ExpenseController {
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<String> updateExpense(@Valid @RequestBody Expense expense, @PathVariable Long id) {
+    public ResponseEntity<String> updateExpense(@Valid @RequestBody ExpenseDTO expense, @PathVariable Long id) {
         Expense toUpdateExpense = expenseService.updateExpense(id, expense);
         return ResponseEntity.ok("Expense updated: " + toUpdateExpense);
     }

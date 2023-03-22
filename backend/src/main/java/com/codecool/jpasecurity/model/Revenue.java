@@ -23,4 +23,14 @@ public class Revenue {
     private boolean isRecursive;
     @NotNull
     private int renewalDayOfMonth;
+
+    @Override
+    public String toString() {
+        return "Revenue{" +
+                "amount=" + amount +
+                ", owner=" + owner +
+                ", isRecursive=" + isRecursive +
+                ", renewalDayOfMonth=" + renewalDayOfMonth +
+                '}';
+    }
 }
