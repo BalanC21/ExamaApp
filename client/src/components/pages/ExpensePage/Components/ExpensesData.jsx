@@ -34,7 +34,7 @@ const ExpensesData = ({item, categories}) => {
 
     async function deleteExpense() {
         newDeleteSWR(`${REACT_APP_CRUD_EXPENSES}/${item.id}`)
-            .then(async (r) => {
+            .then(async () => {
                 await mutate(REACT_APP_CRUD_CHART_DATA, false);
                 notifyDeletedExpense();
                 displayNone();
@@ -49,7 +49,12 @@ const ExpensesData = ({item, categories}) => {
                 displayNone()
                 notifyUpdatedExpense()
             })
-            .catch(() => notifyUpdatedExpenseError())
+            .catch((r) => {
+                console.log("Update Expense")
+                console.log(r.response.data)
+                console.log(r)
+                notifyUpdatedExpenseError()
+            })
     }
 
     return (

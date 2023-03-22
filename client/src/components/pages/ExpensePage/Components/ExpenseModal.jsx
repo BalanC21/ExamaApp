@@ -40,7 +40,10 @@ const ExpenseModal = ({categories}) => {
             revenue.amount = newExpense.amount;
             await newPatchSWR(REACT_APP_CRUD_REVENUE, revenue)
         })
-            .catch(() => {
+            .catch((r) => {
+                console.log("Submit Expense Modal")
+                console.log(r.response.data)
+                console.log(r)
                 notifyAddExpenseError()
             })
     }
