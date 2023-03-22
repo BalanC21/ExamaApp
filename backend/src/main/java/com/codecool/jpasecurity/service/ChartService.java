@@ -4,6 +4,7 @@ import com.codecool.jpasecurity.dto.CatChart;
 import com.codecool.jpasecurity.dto.NeedlePieRevenueDTO;
 import com.codecool.jpasecurity.dto.ToolTipDTO;
 import com.codecool.jpasecurity.enums.ExpenseType;
+import com.codecool.jpasecurity.exceptions.RevenueNotFoundException;
 import com.codecool.jpasecurity.model.Expense;
 import com.codecool.jpasecurity.model.Revenue;
 import com.codecool.jpasecurity.model.User;
@@ -37,8 +38,10 @@ public class ChartService {
 
     public List<ToolTipDTO> getToolTipData() {
         User owner = getUsers.getUser();
-        List<Expense> expenses = expenseRepository.findAllByOwner_UserId(owner.userId);
+
         List<ToolTipDTO> toolTipDTOS = new ArrayList<>();
+        List<Expense> expenses = expenseRepository.findAllByOwner_UserId(owner.userId);
+
         Arrays.stream(getMonths()).forEach(month -> {
             long sumByMonth = expenses.stream().
                     filter(expense -> expense.getLocalDate()
@@ -47,6 +50,7 @@ public class ChartService {
                 toolTipDTOS.add(new ToolTipDTO(month.name(), sumByMonth));
             }
         });
+
         return toolTipDTOS;
     }
 
@@ -71,20 +75,41 @@ public class ChartService {
     }
 
     public List<NeedlePieRevenueDTO> getNeedlePieRevenueDTO() {
+        List<Expense> expenses = getAllExpensesByUser();
+
+        long expensesSum = getExpensesAmountSum(expenses);
+
+        return getNeedlePieRevenueDTOS(expensesSum);
+    }
+
+    private List<NeedlePieRevenueDTO> getNeedlePieRevenueDTOS(long expensesSum) {
         List<NeedlePieRevenueDTO> needlePieRevenueDTOS = new ArrayList<>();
-        User owner = getUsers.getUser();
-        List<Expense> expenses = expenseRepository.findAllByOwner_UserId(owner.userId);
+        Revenue revenue = getRevenueForUser();
 
-        long expensesSum = expenses.stream().
-                mapToLong(Expense::getAmount).sum();
-        Optional<Revenue> revenue = revenueRepository.findByOwner_Username(owner.getUsername());
+        needlePieRevenueDTOS.add(new NeedlePieRevenueDTO(revenue.getAmount(), expensesSum));
 
-        if (revenue.isPresent()) {
-            needlePieRevenueDTOS.add(new NeedlePieRevenueDTO(revenue.get().getAmount(), expensesSum));
-        } else {
-            needlePieRevenueDTOS.add(new NeedlePieRevenueDTO(0L, expensesSum));
-        }
         return needlePieRevenueDTOS;
+    }
+
+    private List<Expense> getAllExpensesByUser() {
+        User owner = getUsers.getUser();
+        return expenseRepository.findAllByOwner_UserId(owner.userId);
+    }
+
+    private Revenue getRevenueForUser() {
+        User owner = getUsers.getUser();
+        Optional<Revenue> ownerRevenue = revenueRepository.findByOwner_Username(owner.getUsername());
+
+        if (ownerRevenue.isEmpty()) {
+            throw new RevenueNotFoundException();
+        }
+
+        return ownerRevenue.get();
+    }
+
+    private long getExpensesAmountSum(List<Expense> expenses) {
+        return expenses.stream().
+                mapToLong(Expense::getAmount).sum();
     }
 
     private Month[] getMonths() {

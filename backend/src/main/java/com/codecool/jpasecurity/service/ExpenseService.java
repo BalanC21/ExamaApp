@@ -9,6 +9,7 @@ import com.codecool.jpasecurity.model.Revenue;
 import com.codecool.jpasecurity.model.User;
 import com.codecool.jpasecurity.repository.ExpenseRepository;
 import com.codecool.jpasecurity.repository.RevenueRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -51,6 +52,7 @@ public class ExpenseService {
         return toSaveExpense;
     }
 
+    @Transactional
     public Expense updateExpense(Long expenseId, ExpenseDTO modifiedExpense) {
         Expense toUpdateExpense = getExpenseById(expenseId);
         modifyUserRevenueForUpdatingExpense(expenseId, modifiedExpense);
@@ -91,6 +93,7 @@ public class ExpenseService {
         return true;
     }
 
+    @Transactional
     private void modifyUserRevenueForDeletingExpense(Long expenseId) {
         Expense toDeleteExpense = getExpenseById(expenseId);
         Revenue ownerRevenue = getRevenueForUser();
