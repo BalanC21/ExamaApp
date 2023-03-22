@@ -37,6 +37,16 @@ public class ExpenseController {
         return expenseService.filterExpensesByType(expenseType);
     }
 
+    @GetMapping("/ordered-amount-asc")
+    public List<Expense> getExpensesOrderedByAmountAsc() {
+        return expenseService.getExpensesOrderedByAmountAsc();
+    }
+
+    @GetMapping("/ordered-amount-desc")
+    public List<Expense> getExpensesOrderedByAmountDesc() {
+        return expenseService.getExpensesOrderedByAmountDesc();
+    }
+
     @GetMapping("/{expenseId}")
     public Expense getExpensesByID(@PathVariable long expenseId) {
         return expenseService.getExpenseByIDTest(expenseId);
