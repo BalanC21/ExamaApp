@@ -21,8 +21,6 @@ import java.util.List;
 @RequestMapping("/api/expenses")
 public class ExpenseController {
     private final ExpenseService expenseService;
-
-
     public ExpenseController(ExpenseService expenseService) {
         this.expenseService = expenseService;
     }

@@ -5,6 +5,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -25,7 +26,7 @@ import java.time.LocalDate;
 @ToString
 public class Expense {
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private Long amount;
     @ManyToOne
@@ -35,6 +36,5 @@ public class Expense {
     private LocalDate localDate;
     private String description;
     @Enumerated(EnumType.STRING)
-//    @Type(value = ExpenseType.class)
     private ExpenseType expenseType;
 }
