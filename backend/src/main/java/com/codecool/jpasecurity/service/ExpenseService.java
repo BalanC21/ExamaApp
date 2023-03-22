@@ -29,27 +29,19 @@ public class ExpenseService {
         this.revenueRepository = revenueRepository;
     }
 
+    public List<Expense> getExpensesOrderedByAmountAsc() {
+        User owner = getUsers.getUser();
+        return repository.getAllByOwner_UsernameOrderByAmount(owner.getUsername()).get();
+    }
+
+    public List<Expense> getExpensesOrderedByAmountDesc() {
+        User owner = getUsers.getUser();
+        return repository.getAllByOwner_UsernameOrderByAmountDesc(owner.getUsername()).get();
+    }
+
     public void addExpense(ExpenseDTO expenseDTO) {
         Expense expense = mapToExpense(expenseDTO);
         repository.save(expense);
-    }
-
-    private Expense mapToExpense(ExpenseDTO expenseDTO) {
-        User owner = getUsers.getUser();
-        Expense toSaveExpense = new Expense();
-
-        toSaveExpense.setAmount(expenseDTO.getAmount());
-        toSaveExpense.setDescription(expenseDTO.getDescription());
-        toSaveExpense.setExpenseType(expenseDTO.getExpenseType());
-
-        if (expenseDTO.getLocalDate() == null) {
-            toSaveExpense.setLocalDate(LocalDate.now());
-        } else {
-            toSaveExpense.setLocalDate(expenseDTO.getLocalDate());
-        }
-
-        toSaveExpense.setOwner(owner);
-        return toSaveExpense;
     }
 
     @Transactional
@@ -91,6 +83,24 @@ public class ExpenseService {
         modifyUserRevenueForDeletingExpense(expenseId);
         repository.deleteById(expenseId);
         return true;
+    }
+
+    private Expense mapToExpense(ExpenseDTO expenseDTO) {
+        User owner = getUsers.getUser();
+        Expense toSaveExpense = new Expense();
+
+        toSaveExpense.setAmount(expenseDTO.getAmount());
+        toSaveExpense.setDescription(expenseDTO.getDescription());
+        toSaveExpense.setExpenseType(expenseDTO.getExpenseType());
+
+        if (expenseDTO.getLocalDate() == null) {
+            toSaveExpense.setLocalDate(LocalDate.now());
+        } else {
+            toSaveExpense.setLocalDate(expenseDTO.getLocalDate());
+        }
+
+        toSaveExpense.setOwner(owner);
+        return toSaveExpense;
     }
 
     @Transactional
@@ -143,7 +153,6 @@ public class ExpenseService {
         if (ownerRevenue.isEmpty()) {
             throw new RevenueNotFoundException();
         }
-
         return ownerRevenue.get();
     }
 }
