@@ -31,27 +31,48 @@ public class ChartService {
         this.getUsers = getUsers;
     }
 
+    private static long getSumByMonth(List<Expense> expenses, Month month) {
+        return expenses.stream().
+                filter(expense -> expense.getLocalDate()
+                        .getMonth().equals(month)).mapToLong(Expense::getAmount).sum();
+    }
+
     public List<CatChart> getPieChartDataForUser() {
         User owner = getUsers.getUser();
         return getCatChartsForUser(owner.userId);
     }
 
     public List<ToolTipDTO> getToolTipData() {
-        User owner = getUsers.getUser();
 
+        List<Expense> expenses = getExpenseForOwner();
+
+        return getToolTipSumByMonth(expenses);
+    }
+
+    private List<ToolTipDTO> getToolTipSumByMonth(List<Expense> expenses) {
         List<ToolTipDTO> toolTipDTOS = new ArrayList<>();
-        List<Expense> expenses = expenseRepository.findAllByOwner_UserId(owner.userId);
 
         Arrays.stream(getMonths()).forEach(month -> {
-            long sumByMonth = expenses.stream().
-                    filter(expense -> expense.getLocalDate()
-                            .getMonth().equals(month)).mapToLong(Expense::getAmount).sum();
+            long sumByMonth = getSumByMonth(expenses, month);
             if (sumByMonth != 0) {
                 toolTipDTOS.add(new ToolTipDTO(month.name(), sumByMonth));
             }
         });
 
         return toolTipDTOS;
+    }
+
+    private List<Expense> getExpenseForOwner() {
+        User owner = getUsers.getUser();
+        return expenseRepository.findAllByOwner_UserId(owner.userId);
+    }
+
+    public List<NeedlePieRevenueDTO> getNeedlePieRevenueDTO() {
+        List<Expense> expenses = getAllExpensesByUser();
+
+        long expensesSum = getExpensesAmountSum(expenses);
+
+        return getNeedlePieRevenueDTOS(expensesSum);
     }
 
     private List<CatChart> getCatChartsForUser(long userId) {
@@ -72,14 +93,6 @@ public class ChartService {
     private CatChart toCatChart(ExpenseType expenseType, long ownerId) {
         int numberOfExpenses = expenseRepository.countByExpenseTypeAndOwner_UserId(expenseType, ownerId);
         return new CatChart(expenseType, numberOfExpenses);
-    }
-
-    public List<NeedlePieRevenueDTO> getNeedlePieRevenueDTO() {
-        List<Expense> expenses = getAllExpensesByUser();
-
-        long expensesSum = getExpensesAmountSum(expenses);
-
-        return getNeedlePieRevenueDTOS(expensesSum);
     }
 
     private List<NeedlePieRevenueDTO> getNeedlePieRevenueDTOS(long expensesSum) {
