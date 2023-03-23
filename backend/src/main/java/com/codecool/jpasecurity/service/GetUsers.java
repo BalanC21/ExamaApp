@@ -1,12 +1,10 @@
 package com.codecool.jpasecurity.service;
 
+import com.codecool.jpasecurity.exceptions.UsernameNotFoundCustomException;
 import com.codecool.jpasecurity.model.User;
 import com.codecool.jpasecurity.repository.GetUser;
 import com.codecool.jpasecurity.repository.UserRepository;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-
-import java.io.IOException;
 
 @Service
 public class GetUsers implements GetUser {
@@ -21,23 +19,39 @@ public class GetUsers implements GetUser {
     @Override
     public User getUser() {
         User user = null;
-        try {
-            user = validateUser();
-        } catch (Exception exception) {
-            exception.printStackTrace();
-            System.out.println(exception.getMessage());
-        }
+        user = validateUser();
         return user;
     }
 
-    private User validateUser() throws IOException {
+//    @Override
+//    public User getUser() {
+//        User user = null;
+//        try {
+//            user = validateUser();
+//        } catch (Exception exception) {
+//            exception.printStackTrace();
+//            System.out.println(exception.getMessage());
+//        }
+//        return user;
+//    }
+
+//    private User validateUser() {
+//        boolean isAuthenticated = authentication.getAuthentication().isAuthenticated();
+//        if (!isAuthenticated) {
+//            throw new IOException("Not Authenticated");
+//        }
+//        String username = authentication.getAuthentication().getName();
+//
+//        return userRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundCustomException(username));
+//    }
+
+    private User validateUser() {
         boolean isAuthenticated = authentication.getAuthentication().isAuthenticated();
         if (!isAuthenticated) {
-            throw new IOException("Not Authenticated");
+            System.out.println("Not Authenticated");
         }
         String username = authentication.getAuthentication().getName();
 
-        return userRepository.findByUsername(username).orElseThrow(
-                () -> new UsernameNotFoundException("Username not found! " + "Username: " + username));
+        return userRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundCustomException(username));
     }
 }
