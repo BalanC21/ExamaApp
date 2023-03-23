@@ -4,6 +4,7 @@ import com.codecool.jpasecurity.dto.LogInDTO;
 import com.codecool.jpasecurity.dto.SignUpDTO;
 import com.codecool.jpasecurity.service.AuthService;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -29,8 +30,7 @@ public class AuthController {
 
     @PostMapping("/signup")
     public ResponseEntity<?> signUp(@Valid @RequestBody SignUpDTO signUpDTO) {
-        authService.signUp(signUpDTO);
-        return ResponseEntity.ok("User registered successfully! " + signUpDTO);
+        return new ResponseEntity<>(authService.signUp(signUpDTO), HttpStatus.CREATED);
     }
 
     @GetMapping("/logout")

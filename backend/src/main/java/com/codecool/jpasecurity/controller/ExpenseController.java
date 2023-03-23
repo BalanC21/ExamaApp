@@ -5,6 +5,7 @@ import com.codecool.jpasecurity.enums.ExpenseType;
 import com.codecool.jpasecurity.model.Expense;
 import com.codecool.jpasecurity.service.ExpenseService;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -60,8 +61,7 @@ public class ExpenseController {
 
     @PostMapping
     public ResponseEntity<ExpenseDTO> addExpense(@Valid @RequestBody ExpenseDTO expenseDTO) {
-        expenseService.addExpense(expenseDTO);
-        return ResponseEntity.ok(expenseDTO);
+        return new ResponseEntity<>(expenseService.addExpense(expenseDTO), HttpStatus.CREATED);
     }
 
     @PostMapping("/amount/filter")
