@@ -30,6 +30,7 @@ public class Expense {
     private Long amount;
     private String description;
     @Enumerated(EnumType.STRING)
+
     private ExpenseType expenseType;
     private LocalDate localDate;
     @ManyToOne

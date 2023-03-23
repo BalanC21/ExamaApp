@@ -2,12 +2,10 @@ package com.codecool.jpasecurity.model;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -26,17 +24,10 @@ import lombok.Setter;
 @Setter
 public class User {
     @Id
-    @GeneratedValue()
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     public long userId;
-    @NotBlank
-    @Size(max = 20)
     private String username;
-    @NotBlank
-    @Size(max = 80)
-    @Email
     private String email;
-    @NotBlank
-    @Size(max = 150)
     private String password;
     private String roles;
 
