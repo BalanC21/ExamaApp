@@ -39,9 +39,10 @@ public class ExpenseService {
         return repository.getAllByOwner_UsernameOrderByAmountDesc(owner.getUsername()).get();
     }
 
-    public void addExpense(ExpenseDTO expenseDTO) {
+    public ExpenseDTO addExpense(ExpenseDTO expenseDTO) {
         Expense expense = mapToExpense(expenseDTO);
         repository.save(expense);
+        return expenseDTO;
     }
 
     @Transactional

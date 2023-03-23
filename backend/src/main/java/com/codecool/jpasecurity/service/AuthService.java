@@ -27,12 +27,13 @@ public class AuthService {
         this.encoder = encoder;
     }
 
-    public void signUp(SignUpDTO signUpDTO) {
+    public SignUpDTO signUp(SignUpDTO signUpDTO) {
         User user = new User(signUpDTO.username(),
                 signUpDTO.email(),
                 encoder.encode(signUpDTO.password()),
                 "ROLE_USER");
         userRepository.save(user);
+        return signUpDTO;
     }
 
     public String authenticateUser(@Valid @RequestBody LogInDTO userLogIn) {
