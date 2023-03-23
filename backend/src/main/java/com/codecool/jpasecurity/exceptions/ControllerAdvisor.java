@@ -1,6 +1,6 @@
 package com.codecool.jpasecurity.exceptions;
 
-import jakarta.validation.ConstraintViolationException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -16,24 +16,18 @@ import java.util.Map;
 @ControllerAdvice
 public class ControllerAdvisor {
     @ExceptionHandler(ExpenseNotFoundException.class)
-    public ResponseEntity<Object> taskNotFoundException(ExpenseNotFoundException exception) {
+    public ResponseEntity<Map<String, Object>> taskNotFoundException(ExpenseNotFoundException exception) {
         return getObjectResponseEntity(exception.getMessage());
+    }
+
+    @ExceptionHandler(UsernameNotFoundCustomException.class)
+    public ResponseEntity<Map<String, Object>> taskNotFoundException(UsernameNotFoundCustomException usernameNotFoundCustomException) {
+        return getObjectResponseEntity(usernameNotFoundCustomException.getMessage());
     }
 
     @ExceptionHandler(RevenueNotFoundException.class)
-    public ResponseEntity<Object> revenueNotFoundException(RevenueNotFoundException exception) {
+    public ResponseEntity<Map<String, Object>> revenueNotFoundException(RevenueNotFoundException exception) {
         return getObjectResponseEntity(exception.getMessage());
-    }
-
-    @ExceptionHandler(ConstraintViolationException.class)
-    public Map<String, Object> constraintViolationException(ConstraintViolationException constraintViolationException) {
-        Map<String, Object> body = new LinkedHashMap<>();
-
-        body.put("valid", false);
-        body.put("Timestamp", LocalDateTime.now());
-        body.put("Exception Message", constraintViolationException.getMessage());
-
-        return body;
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -44,7 +38,7 @@ public class ControllerAdvisor {
         methodArgumentNotValidException
                 .getBindingResult()
                 .getFieldErrors()
-                .forEach(error -> body.put(error.getField(), error.getDefaultMessage()));
+                .forEach(error -> body.put(error.getField(), error.getField() + " field " + error.getDefaultMessage()));
         body.put("status", HttpStatus.BAD_REQUEST);
 
         return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
@@ -52,23 +46,40 @@ public class ControllerAdvisor {
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<Map<String, Object>> httpMessageNotReadableException(HttpMessageNotReadableException httpMessageNotReadableException) {
+        return getObjectResponseEntity(httpMessageNotReadableException.getMessage());
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<Map<String, Object>> dataIntegrityViolationException(DataIntegrityViolationException dataIntegrityViolationException) {
         Map<String, Object> body = new HashMap<>();
 
         body.put("valid", false);
         body.put("Timestamp", LocalDateTime.now());
-        body.put("Exception Message", httpMessageNotReadableException.getMessage());
+        body.put("Most Specific Cause Message", dataIntegrityViolationException.getMostSpecificCause().getMessage());
         body.put("status", HttpStatus.BAD_REQUEST);
 
         return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
     }
 
-    private ResponseEntity<Object> getObjectResponseEntity(String message) {
+    private ResponseEntity<Map<String, Object>> getObjectResponseEntity(String message) {
         Map<String, Object> body = new LinkedHashMap<>();
 
         body.put("valid", false);
         body.put("Timestamp", LocalDateTime.now());
         body.put("Exception Message", message);
+        body.put("status", HttpStatus.BAD_REQUEST);
 
         return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
     }
+
+//    @ExceptionHandler(ConstraintViolationException.class)
+//    public Map<String, Object> constraintViolationException(ConstraintViolationException constraintViolationException) {
+//        Map<String, Object> body = new LinkedHashMap<>();
+//
+//        body.put("valid", false);
+//        body.put("Timestamp", LocalDateTime.now());
+//        body.put("Exception Message", constraintViolationException.getMessage());
+//
+//        return body;
+//    }
 }
