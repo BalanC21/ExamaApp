@@ -3,10 +3,11 @@ package com.codecool.jpasecurity.controller;
 import com.codecool.jpasecurity.dto.LogInDTO;
 import com.codecool.jpasecurity.dto.SignUpDTO;
 import com.codecool.jpasecurity.service.AuthService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -33,9 +34,9 @@ public class AuthController {
         return new ResponseEntity<>(authService.signUp(signUpDTO), HttpStatus.CREATED);
     }
 
-    @GetMapping("/logout")
-    public ResponseEntity<?> logOut() {
-        SecurityContextHolder.clearContext();
-        return ResponseEntity.ok("Logged Out!");
-    }
+//    @GetMapping("/logout")
+//    public ResponseEntity<?> logOut(HttpServletRequest request, HttpServletResponse response) {
+//        authService.logOut(request, response);
+//        return ResponseEntity.ok("Logged Out!");
+//    }
 }
