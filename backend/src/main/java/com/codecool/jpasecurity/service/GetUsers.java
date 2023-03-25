@@ -1,5 +1,6 @@
 package com.codecool.jpasecurity.service;
 
+import com.codecool.jpasecurity.exceptions.AuthenticationCustomException;
 import com.codecool.jpasecurity.exceptions.UsernameNotFoundCustomException;
 import com.codecool.jpasecurity.model.User;
 import com.codecool.jpasecurity.repository.GetUser;
@@ -18,9 +19,24 @@ public class GetUsers implements GetUser {
 
     @Override
     public User getUser() {
-        User user = null;
-        user = validateUser();
-        return user;
+        return validateUser();
+    }
+
+    private User validateUser() {
+        isUserAuthenticated();
+
+        String username = authentication.getAuthentication().getName();
+
+        return userRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundCustomException(username));
+    }
+
+    private void isUserAuthenticated() {
+        boolean isAuthenticated = authentication.getAuthentication().isAuthenticated();
+
+        if (!isAuthenticated) {
+            throw new AuthenticationCustomException();
+        }
     }
 
 //    @Override
@@ -44,14 +60,4 @@ public class GetUsers implements GetUser {
 //
 //        return userRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundCustomException(username));
 //    }
-
-    private User validateUser() {
-        boolean isAuthenticated = authentication.getAuthentication().isAuthenticated();
-        if (!isAuthenticated) {
-            System.out.println("Not Authenticated");
-        }
-        String username = authentication.getAuthentication().getName();
-
-        return userRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundCustomException(username));
-    }
 }
