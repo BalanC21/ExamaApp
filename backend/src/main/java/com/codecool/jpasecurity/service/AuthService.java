@@ -4,12 +4,15 @@ import com.codecool.jpasecurity.dto.LogInDTO;
 import com.codecool.jpasecurity.dto.SignUpDTO;
 import com.codecool.jpasecurity.model.User;
 import com.codecool.jpasecurity.repository.UserRepository;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -42,4 +45,11 @@ public class AuthService {
         SecurityContextHolder.getContext().setAuthentication(authentication);
         return tokenService.generateToken(authentication);
     }
+
+//    public void logOut(HttpServletRequest request, HttpServletResponse response) {
+//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+//        if (authentication != null) {
+//            new SecurityContextLogoutHandler().logout(request, response, authentication);
+//        }
+//    }
 }
