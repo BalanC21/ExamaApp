@@ -3,6 +3,7 @@ package com.codecool.jpasecurity.controller;
 import com.codecool.jpasecurity.dto.RevenueDTO;
 import com.codecool.jpasecurity.model.Revenue;
 import com.codecool.jpasecurity.service.RevenueService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -27,15 +28,12 @@ public class RevenueController {
     }
 
     @PostMapping
-    public ResponseEntity<RevenueDTO> addRevenue(@RequestBody RevenueDTO revenueDTO) {
+    public ResponseEntity<RevenueDTO> addRevenue(@Valid @RequestBody RevenueDTO revenueDTO) {
         return ResponseEntity.ok(revenueService.addRevenue(revenueDTO));
     }
 
     @PatchMapping
-    public ResponseEntity<Revenue> updateRevenueAmount(@RequestBody Revenue revenue) {
-        System.out.println("revenue");
-        System.out.println(revenue);
-        System.out.println("revenue");
+    public ResponseEntity<Revenue> updateRevenueAmount(@Valid @RequestBody Revenue revenue) {
         return ResponseEntity.ok(revenueService.modifyRevenue(revenue));
     }
 }
