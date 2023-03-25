@@ -1,6 +1,7 @@
 package com.codecool.jpasecurity.service;
 
 import com.codecool.jpasecurity.dto.RevenueDTO;
+import com.codecool.jpasecurity.exceptions.RevenueNotFoundException;
 import com.codecool.jpasecurity.model.Revenue;
 import com.codecool.jpasecurity.model.User;
 import com.codecool.jpasecurity.repository.RevenueRepository;
@@ -29,13 +30,8 @@ public class RevenueService {
 
     public Revenue findRevenueByUser() {
         User owner = getUsers.getUser();
-        try {
-            return repository.findByOwner_Username(owner.getUsername())
-                    .orElseThrow(() -> new NoSuchElementException("User's Revenue Not Found!"));
-        } catch (Exception exception) {
-            System.out.println("Revenue is not set by the user");
-        }
-        return new Revenue();
+        return repository.findByOwner_Username(owner.getUsername())
+                .orElseThrow(RevenueNotFoundException::new);
     }
 
     public Revenue modifyRevenue(Revenue revenueAmount) {
