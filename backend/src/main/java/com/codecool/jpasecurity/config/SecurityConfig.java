@@ -39,6 +39,7 @@ public class SecurityConfig {
     private final JpaUserDetailsService userDetailsService;
     @Value("${jwt.key}")
     private String jwtKey;
+
     public SecurityConfig(JpaUserDetailsService userDetailsService) {
         this.userDetailsService = userDetailsService;
     }
@@ -60,8 +61,8 @@ public class SecurityConfig {
                         .authenticationEntryPoint(new BearerTokenAuthenticationEntryPoint())
                         .accessDeniedHandler(new BearerTokenAccessDeniedHandler()))
                 .logout(logout -> logout
-                        .logoutUrl("/api/auth/logout"))
-//                        .logoutSuccessUrl("http://localhost:3000/login"))
+                        .logoutUrl("http://localhost:8888/api/auth/logout")
+                        .logoutSuccessUrl("http://localhost:8888/api/expenses"))
                 .build();
     }
 
