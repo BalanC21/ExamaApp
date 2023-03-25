@@ -30,6 +30,11 @@ public class ControllerAdvisor {
         return getObjectResponseEntity(exception.getMessage());
     }
 
+    @ExceptionHandler(AuthenticationCustomException.class)
+    public ResponseEntity<Map<String, Object>> authenticationCustomException(AuthenticationCustomException authenticationCustomException) {
+        return getObjectResponseEntity(authenticationCustomException.getMessage());
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, Object>> methodArgumentNotValidException(MethodArgumentNotValidException methodArgumentNotValidException) {
         Map<String, Object> body = new HashMap<>();
@@ -71,15 +76,4 @@ public class ControllerAdvisor {
 
         return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
     }
-
-//    @ExceptionHandler(ConstraintViolationException.class)
-//    public Map<String, Object> constraintViolationException(ConstraintViolationException constraintViolationException) {
-//        Map<String, Object> body = new LinkedHashMap<>();
-//
-//        body.put("valid", false);
-//        body.put("Timestamp", LocalDateTime.now());
-//        body.put("Exception Message", constraintViolationException.getMessage());
-//
-//        return body;
-//    }
 }
